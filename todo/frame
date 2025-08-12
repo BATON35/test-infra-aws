@@ -1,0 +1,71 @@
+Profesjonalny flow: Jenkins + Mikroserwisy na EKS
+🔹 1. Infrastructure as Code (IaC) — Terraform
+Tworzy VPC, subnets, security groups
+
+Tworzy klaster EKS (control plane + node groups)
+
+Tworzy inne zasoby: RDS, S3, IAM, EFS (jeśli potrzebne)
+
+📦 Repo: infra/terraform/
+
+🔹 2. Provisioning & Configuration — Ansible
+Instaluje narzędzia na bastionie (kubectl, helm, aws-cli)
+
+Konfiguruje kubeconfig do zarządzania EKS
+
+Może uruchamiać Helm do wdrożeń
+
+📦 Repo: infra/ansible/
+
+🔹 3. Deployment — Helm + Kubernetes
+Jenkins jako Helm chart (jenkins/jenkins)
+
+Mikroserwisy jako Deployment + Service + Ingress
+
+Konfiguracja przez values.yaml i ConfigMap
+
+📦 Repo: apps/jenkins/, apps/microservices/
+
+🔹 4. CI/CD Pipeline — Jenkinsfile
+Jenkins uruchamia pipeline po pushu do GitHuba
+
+Etapy: testy, build, push do ECR, deploy do EKS
+
+Monitorowanie przez Prometheus + Grafana
+
+📦 Repo: ci-cd/
+
+🔹 5. Monitoring & Observability
+Prometheus + Grafana
+
+Loki + Fluent Bit (logi)
+
+Alertmanager + Slack/Email
+
+📦 Repo: monitoring/
+
+
+Minimalny zestaw na start (infra/terraform/)
+Kategoria	Co potrzebne na start?	Co można dorzucić później?
+Sieć (VPC, Subnets)	✅ Wymagana	❌ Nie pomijamy
+Security Groups	✅ Dla EKS i bastiona	➕ Rozdzielone SG dla mikroserwisów
+EKS Cluster	✅ Control Plane + Node Groups	❌ Nie pomijamy
+S3	❌ Opcjonalne	➕ Backupy, artefakty CI/CD
+ECR	✅ Do pushowania obrazów	❌ Niezbędne dla CI/CD pipeline
+IAM Role (EKS)	✅ Z OIDC	➕ Dodatkowe polityki per pod
+Bastion EC2	✅ Do dostępu	➕ Można zautomatyzować przez Ansible
+RDS / EFS	❌ Pomijamy na start	➕ Jeśli mikroserwisy potrzebują DB lub persistent storage
+
+
+
+trzymanie zmiennych :
+HashiCorp Vault / AWS SSM / Secrets Manager
+Jeśli chcesz iść w pełną produkcję:
+
+Trzymasz zmienne w Vault lub SSM
+
+Jenkins pobiera je przez API
+
+Przekazuje do Terraform jako ENV lub -var
+
+terraform workspace to mechanizm zarządzania wieloma środowiskami (np. dev, staging, prod) w ramach jednego katalogu z kodem. Dzięki temu nie musisz kopiować plików do osobnych folderów — wszystko jest elegancko zorganizowane.

@@ -1,35 +1,87 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-lib/
-helm/umbrella/charts/
+# === Terraform ===
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.tfstate.lock.info
+*.plan
+.terraformrc
+terraform.rc
+*.tfplan
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# === Ansible ===
+*.retry
+.ansible/
+*.log
+*.tmp
+*.bak
+*.swp
+*.vault
+*.pem
+*.key
+*.pub
+*.secret
+roles/**/files/*
+!roles/requirements.yml
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# === Kubernetes (k8s) ===
+*.yaml~
+*.yml~
+*.log
+*.out
+*.bak
+*.tmp
+.kube/
+.kubectl/
+*.crt
+*.csr
+*.key
+*.conf
+*.env
+*.secret
+*.token
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# === Helm ===
+*.tgz
+*.lock
+.chart/
+charts/
+tmpcharts/
+*.helmignore
+values-secret.yaml
+values*.local.yaml
+values*.dev.yaml
 
-### VS Code ###
+# === Jenkins ===
+*.log
+*.tmp
+*.bak
+*.old
+*.jpi
+*.jpi.pinned
+*.json
+.secret.key*
+secrets/
+credentials.xml
+identity.key
+queue.xml
+fingerprints/
+updates/
+workspace/
+builds/
+nextBuildNumber
+jobs/**/workspace
+jobs/**/builds
+jobs/**/nextBuildNumber
+jobs/**/last*
+jobs/**/config.xml.bak
+.idea/
 .vscode/
+.DS_Store
