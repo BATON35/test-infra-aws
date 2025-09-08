@@ -1,0 +1,5 @@
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Install Python 3 on Debian/Ubuntu
+      raw: apt update -y && apt install -y python3

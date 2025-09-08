@@ -1,0 +1,39 @@
+ADR-002: # Architecture Decision Record: Use Managed Node Groups in EKS
+
+## Status
+Accepted
+
+## Context
+We are deploying a Kubernetes cluster on AWS using Amazon EKS. The cluster will run workloads that require DaemonSets, such as monitoring agents, logging collectors, and network plugins. Specifically, we plan to deploy observability tools like **Grafana**, **Kibana**, and **Prometheus**, which rely on DaemonSets to collect metrics and logs from all nodes.
+
+Amazon EKS offers three main options for worker nodes:
+- **Managed Node Groups**: AWS-managed EC2 instances with automatic updates and scaling.
+- **Self-managed Nodes**: Manually provisioned EC2 instances with full control but more operational overhead.
+- **Fargate Profiles**: Serverless pods without access to the underlying nodes, which do not support DaemonSets.
+
+We also considered **Amazon ECS**, but it does not support DaemonSets or the Kubernetes-native deployment model required by our observability stack.
+
+## Decision
+We will use **Managed Node Groups** to provision worker nodes in our EKS cluster.
+
+## Rationale
+- **DaemonSet Compatibility**: Managed Node Groups support DaemonSets, which are required for Grafana, Kibana, Prometheus, and other node-level agents.
+- **Operational Simplicity**: AWS handles updates, scaling, and lifecycle management.
+- **Security**: IAM roles and security groups are integrated and easier to manage.
+- **Flexibility**: We retain access to EC2 instances for debugging, tagging, and monitoring.
+- **Scalability**: Node groups can be scaled automatically based on workload demand.
+- **Kubernetes-native tooling**: EKS supports Helm charts, CRDs, and other Kubernetes-native constructs that ECS does not.
+
+## Consequences
+- We will not use Fargate for workloads requiring DaemonSets.
+- We will rely on AWS to manage the lifecycle of EC2 nodes.
+- We must ensure proper IAM roles and `aws-auth` ConfigMap configuration for node access.
+- ECS is excluded as a platform due to lack of support for DaemonSets and Kubernetes-native tooling.
+
+## Alternatives Considered
+- **Self-managed Nodes**: Rejected due to higher operational complexity.
+- **Fargate Profiles**: Rejected due to lack of DaemonSet support.
+- **Amazon ECS**: Rejected due to architectural mismatch with observability stack.
+
+## Notes
+This decision aligns with best practices for EKS clusters that require node-level agents and observability tools. It ensures compatibility with Kubernetes-native deployments and simplifies operational overhead.

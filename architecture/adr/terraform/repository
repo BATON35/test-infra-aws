@@ -1,0 +1,60 @@
+ADR-001: Terraform Repository Structure for Multi-Environment Infrastructure
+Status: Accepted Date: 2025-08-18 Decision: Use a single Terraform repository with workspaces and environment-specific tfvars files Author: Konrad
+
+📘 Context
+The project involves deploying cloud infrastructure on AWS using Terraform as the Infrastructure as Code (IaC) tool. The system will support multiple environments (dev, test, prod) and integrate with CI/CD (Jenkins), provisioning (Ansible), and monitoring (Prometheus, Grafana).
+
+Two approaches were considered for organizing the Terraform codebase:
+
+Option A: A single repository using terraform workspace and dedicated terraform.tfvars files per environment
+
+Option B: Separate repositories for each environment
+
+🧠 Decision
+We chose Option A — a single Terraform repository with workspaces and environment-specific tfvars files.
+
+📌 Rationale
+Criteria	Option A (Chosen)	Option B
+Modularity	Shared modules, easier refactoring	Code duplication
+Change Management	Unified change history, simpler pull requests	Fragmented changes
+CI/CD Automation	Simple environment parameter in pipeline	More configuration per repo
+Workspace Support	Native state and variable separation	Manual state handling
+Scalability	Easy to add new environments	Requires new repositories
+Security	Secrets via Vault/SSM, access control per workspace	Repo-level isolation
+📁 Implementation
+Repository structure:
+
+Code
+infra/
+├── terraform/
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── terraform.tfvars.dev
+│   ├── terraform.tfvars.test
+│   ├── terraform.tfvars.prod
+│   └── modules/
+│       ├── eks/
+│       ├── vpc/
+│       └── rds/
+
+
+Environment management:
+
+bash
+terraform workspace new dev
+terraform workspace select dev
+terraform apply -var-file="terraform.tfvars.dev"
+🔐 Secrets and Variables
+Stored in HashiCorp Vault / AWS SSM / Secrets Manager
+
+Retrieved by Jenkins and passed as -var or environment variables
+
+Workspaces ensure isolated state files (terraform.tfstate) per environment
+
+📣 Consequences
+Simplified management and automation
+
+Consistency across environments
+
+Requires strong version control and testing before production deployments

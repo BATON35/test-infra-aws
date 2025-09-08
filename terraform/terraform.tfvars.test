@@ -1,4 +1,16 @@
-aws_region        = "eu-central-1"
-cluster_name      = "eks-devops"
-# vpc_cidr          = "10.0.0.0/16"
-# ecr_repositories  = "jenkins"
+region        = "eu-central-1"
+
+eks_cluster_role_name = "role-test-claster"
+eks_node_role_name = "role-test-node"
+
+cluster_name    = "eks-test"
+cluster_version = "1.29"
+environment     = "test"
+
+cluster_endpoint_public_access        = true
+cluster_endpoint_public_access_cidrs = ["5.173.26.0/24"]
+
+create_eks = false
+vpc_cidr = "10.0.0.0/16"
+
+
