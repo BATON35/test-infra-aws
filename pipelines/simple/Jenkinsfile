@@ -1,0 +1,112 @@
+pipeline {
+    agent any
+    
+    environment {
+        PROJECT_NAME = 'test-infra-aws'
+        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Environment Info') {
+            steps {
+                echo "🚀 Starting pipeline for ${PROJECT_NAME}"
+                echo "📋 Build Number: ${BUILD_NUMBER}"
+                echo "🏷️  Branch: ${env.BRANCH_NAME ?: 'main'}"
+                
+                script {
+                    sh '''
+                        echo "=== System Information ==="
+                        uname -a
+                        echo ""
+                        echo "=== Available Tools ==="
+                        which git || echo "Git not found"
+                        which aws || echo "AWS CLI not found"
+                        which terraform || echo "Terraform not found"
+                        echo ""
+                        echo "=== Disk Space ==="
+                        df -h
+                        echo ""
+                        echo "=== Memory ==="
+                        free -h
+                    '''
+                }
+            }
+        }
+        
+        stage('Checkout') {
+            steps {
+                echo "📥 Checking out code..."
+                // Git checkout happens automatically in pipeline
+                sh 'pwd && ls -la'
+            }
+        }
+        
+        stage('Validate') {
+            steps {
+                echo "✅ Running validation checks..."
+                script {
+                    sh '''
+                        echo "=== Checking project structure ==="
+                        ls -la
+                        
+                        echo "=== Checking Terraform files ==="
+                        if [ -d "terraformV2" ]; then
+                            echo "✅ TerraformV2 directory found"
+                            find terraformV2 -name "*.tf" | head -5
+                        else
+                            echo "❌ TerraformV2 directory not found"
+                        fi
+                        
+                        echo "=== Checking pipeline files ==="
+                        if [ -f "pipelines/simple/Jenkinsfile" ]; then
+                            echo "✅ Jenkinsfile found"
+                        else
+                            echo "❌ Jenkinsfile not found"
+                        fi
+                    '''
+                }
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo "🧪 Running tests..."
+                script {
+                    sh '''
+                        echo "=== Basic connectivity test ==="
+                        ping -c 3 google.com || echo "No internet connectivity"
+                        
+                        echo "=== Jenkins environment test ==="
+                        echo "Jenkins Home: $JENKINS_HOME"
+                        echo "Workspace: $WORKSPACE"
+                        echo "Job Name: $JOB_NAME"
+                        
+                        echo "=== File permissions test ==="
+                        touch test-file.txt
+                        echo "Test content" > test-file.txt
+                        cat test-file.txt
+                        rm test-file.txt
+                        echo "✅ File operations working"
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "🏁 Pipeline completed!"
+            echo "📊 Build result: ${currentBuild.result ?: 'SUCCESS'}"
+        }
+        success {
+            echo "✅ Pipeline succeeded!"
+        }
+        failure {
+            echo "❌ Pipeline failed!"
+        }
+        cleanup {
+            echo "🧹 Cleaning up workspace..."
+            cleanWs()
+        }
+    }
+}
